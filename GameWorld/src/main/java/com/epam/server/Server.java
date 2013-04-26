@@ -1,37 +1,50 @@
 package com.epam.server;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
-import org.apache.mina.core.service.IoAcceptor;
-import org.apache.mina.transport.socket.DatagramSessionConfig;
-import org.apache.mina.transport.socket.nio.NioDatagramAcceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.epam.protocol.builder.MessageBuilder;
+import com.epam.protocol.builder.impl.LoginClientMessageBuilder;
+import com.epam.protocol.domain.message.client.LoginClientMessage;
 
 public class Server {
-	private static final int PORT = 1234;
-
-	private final static Logger logger = (Logger) LoggerFactory
-			.getLogger(Server.class);
+	public static final int PORT = 95;
 
 	public static void main(String[] args) throws IOException {
-		initServer();
-	}
+		MessageBuilder messageBuilder = new LoginClientMessageBuilder();
 
-	private static void initServer() throws IOException {
-		IoAcceptor acceptor = new NioDatagramAcceptor();
+		ServerSocket serverSocket = null;
 
-		acceptor.setHandler(new ServerHandler());
-		DatagramSessionConfig sessionConfig = (DatagramSessionConfig) acceptor
-				.getSessionConfig();
+		try {
+			serverSocket = new ServerSocket(PORT);
+		} catch (IOException e) {
+			System.err.println("Cannot find port " + PORT);
+		}
 
-		sessionConfig.setReuseAddress(true);
-		logger.debug("Starting server...");
+		Socket socket = null;
+		try {
+			socket = serverSocket.accept();
+			System.out.println("Connection accepted at :" + socket);
+		} catch (IOException e) {
+			System.out.println("Server failed to accept");
+			System.exit(1);
+		}
 
-		acceptor.bind(new InetSocketAddress("localhost", PORT));
-		logger.debug("Server listening port: " + PORT);
-		acceptor.broadcast("hello from server");
-		System.out.println("brodcasting");
+		DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+		DataInputStream dis = new DataInputStream(socket.getInputStream());
+
+		while (true) {
+
+			LoginClientMessage loginMessage = (LoginClientMessage) messageBuilder
+					.buildMessage(dis);
+			System.out.println("Message reseived");
+			System.out.println("login " + loginMessage.getLogin());
+		}
+
+		// dos.close();
+		// socket.close();
 	}
 }

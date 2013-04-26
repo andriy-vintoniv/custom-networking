@@ -1,47 +1,42 @@
 package com.epam.client;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
-import org.apache.mina.core.future.ConnectFuture;
-import org.apache.mina.core.service.IoConnector;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
-import org.apache.mina.filter.logging.LoggingFilter;
-import org.apache.mina.transport.socket.nio.NioSocketConnector;
+import com.epam.protocol.domain.message.client.LoginClientMessage;
+import com.epam.protocol.serializer.ClentMessageSerializer;
+import com.epam.server.Server;
 
 public class Client {
-	private static final int PORT = 1234;
 
-	public static void main(String[] args) throws IOException,
-			InterruptedException {
-		IoConnector connector = new NioSocketConnector();
-		connector.getSessionConfig().setReadBufferSize(2048);
+	public static void main(String[] args) throws IOException {
 
-		connector.getFilterChain().addLast("logger", new LoggingFilter());
-		connector.getFilterChain().addLast(
-				"codec",
-				new ProtocolCodecFilter(new TextLineCodecFactory(Charset
-						.forName("UTF-8"))));
+		ClentMessageSerializer clentMessageTransformer = new ClentMessageSerializer();
 
-		connector.setHandler(new MinaClientHandler("Hello Server.."));
-		ConnectFuture future = connector.connect(new InetSocketAddress(
-				"localhost", PORT));
-		future.awaitUninterruptibly();
+		Socket socket = null;
+		BufferedReader br = null;
+		DataOutputStream dos = null;
 
-		if (!future.isConnected()) {
-			System.err.println("Connection fails.");
-			return;
+		try {
+			socket = new Socket(InetAddress.getLocalHost(), Server.PORT);
+			br = new BufferedReader(new InputStreamReader(System.in));
+			dos = new DataOutputStream(socket.getOutputStream());
+		} catch (UnknownHostException e) {
+			System.err.println("Unknow host: " + Server.PORT);
+			System.exit(0);
 		}
-		IoSession session = future.getSession();
-		session.getConfig().setUseReadOperation(true);
-		session.getCloseFuture().awaitUninterruptibly();
+		clentMessageTransformer.setOutputStream(dos);
+		clentMessageTransformer.serializeMessage(new LoginClientMessage(
+				"test login message."));
 
-		System.out.println("After Writing");
-		connector.dispose();
+		br.close();
+		dos.close();
+		socket.close();
 
 	}
-
 }

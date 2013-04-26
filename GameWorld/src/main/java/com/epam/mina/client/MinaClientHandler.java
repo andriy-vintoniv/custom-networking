@@ -1,4 +1,4 @@
-package com.epam.client;
+package com.epam.mina.client;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;

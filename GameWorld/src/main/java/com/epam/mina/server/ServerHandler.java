@@ -1,4 +1,4 @@
-package com.epam.server;
+package com.epam.mina.server;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
@@ -30,12 +30,12 @@ public class ServerHandler extends IoHandlerAdapter {
 	public void sessionIdle(IoSession session, IdleStatus status) {
 		logger.info("Disconnecting the idle.");
 		// disconnect an idle client
-		session.close();
+		session.close(true);
 	}
 
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) {
 		// close the connection on exceptional situation
-		session.close();
+		session.close(true);
 	}
 }
