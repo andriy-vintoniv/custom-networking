@@ -3,7 +3,9 @@ package com.epam.protocol.domain.message.server;
 import com.epam.protocol.domain.message.Message;
 
 public class MoveFailureMessage implements Message {
-	private static final byte id = 7;
+	public static final int INVALID_POSITION = 1;
+	public static final int BUSY_POSITION = 2;
+	private static final byte ID = 7;
 	private int reason;
 
 	public MoveFailureMessage() {
@@ -14,7 +16,7 @@ public class MoveFailureMessage implements Message {
 	}
 
 	public byte getId() {
-		return id;
+		return ID;
 	}
 
 	public int getReason() {

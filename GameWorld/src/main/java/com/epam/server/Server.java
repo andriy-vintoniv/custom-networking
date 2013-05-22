@@ -1,7 +1,6 @@
 package com.epam.server;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -33,7 +32,6 @@ public class Server {
 			System.exit(1);
 		}
 
-		DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 		DataInputStream dis = new DataInputStream(socket.getInputStream());
 
 		while (true) {

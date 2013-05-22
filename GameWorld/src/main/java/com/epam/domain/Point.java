@@ -1,28 +1,11 @@
 package com.epam.domain;
 
-public class User {
+public class Point {
 
 	private int id;
 	private String name;
 	private String color;
-	private int coordinateX;
-	private int coordinateY;
-
-	public int getCoordinateY() {
-		return coordinateY;
-	}
-
-	public void setCoordinateY(int coordinateY) {
-		this.coordinateY = coordinateY;
-	}
-
-	public int getCoordinateX() {
-		return coordinateX;
-	}
-
-	public void setCoordinateX(int coordinateX) {
-		this.coordinateX = coordinateX;
-	}
+	private WorldPosition worldPosition;
 
 	public String getColor() {
 		return color;
@@ -46,5 +29,13 @@ public class User {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public WorldPosition getWorldPosition() {
+		return worldPosition;
+	}
+
+	public void setWorldPosition(WorldPosition worldPosition) {
+		this.worldPosition = worldPosition;
 	}
 }

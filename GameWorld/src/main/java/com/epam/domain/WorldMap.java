@@ -3,30 +3,32 @@ package com.epam.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.epam.domain.Coordinate;
-import com.epam.domain.State;
-
 public class WorldMap {
 
-	private final static int MAP_SIZE = 100;
+	public final static int MAP_SIZE = 100;
+	private static WorldMap instance = new WorldMap();
 
-	private Map<Coordinate, State> worldMap;
+	private Map<WorldPosition, State> worldMap;
 
-	public WorldMap() {
-		this.worldMap = new HashMap<Coordinate, State>();
+	private WorldMap() {
+		this.worldMap = new HashMap<WorldPosition, State>();
 
 		for (int i = 0; i < MAP_SIZE; i++) {
 			for (int j = 0; j < MAP_SIZE; j++) {
-				worldMap.put(new Coordinate(i, j), new State());
+				worldMap.put(new WorldPosition(i, j), new State());
 			}
 		}
 	}
 
-	public Map<Coordinate, State> getWorldMap() {
+	public static WorldMap getInstance() {
+		return instance;
+	}
+
+	public Map<WorldPosition, State> getWorldMap() {
 		return worldMap;
 	}
 
-	public void setWorldMap(Map<Coordinate, State> worldMap) {
+	public void setWorldMap(Map<WorldPosition, State> worldMap) {
 		this.worldMap = worldMap;
 	}
 }
