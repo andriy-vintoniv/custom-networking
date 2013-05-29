@@ -1,10 +1,11 @@
 package com.epam.protocol.domain.message.server;
 
 import com.epam.protocol.domain.message.Message;
+import com.epam.protocol.domain.message.constants.ServerMessageType;
 
 public class LoginSuccessServerMessage implements Message {
 
-	private static final byte id = 1;
+	private static final byte id = ServerMessageType.SM_LOGIN_SUCCESS;
 	private int clientId;
 	private int x;
 	private int y;

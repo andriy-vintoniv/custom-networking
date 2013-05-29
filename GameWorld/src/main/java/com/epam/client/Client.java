@@ -30,7 +30,6 @@ public class Client {
 			System.err.println("Unknow host: " + Server.PORT);
 			System.exit(0);
 		}
-		clentMessageTransformer.setOutputStream(dos);
 		clentMessageTransformer.serializeMessage(new LoginClientMessage(
 				"test login message."));
 

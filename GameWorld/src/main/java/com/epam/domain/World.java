@@ -3,9 +3,7 @@ package com.epam.domain;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.epam.protocol.domain.message.Message;
-import com.epam.protocol.domain.message.server.MoveFailureMessage;
-import com.epam.protocol.domain.message.server.MoveSuccessMessage;
+import com.epam.protocol.domain.message.constants.MoveResult;
 
 public class World {
 	private final static World instance = new World();
@@ -32,47 +30,30 @@ public class World {
 		}
 	}
 
-	public Message movePoint(int pointId, WorldPosition newPosition) {
-		Message moveMessage = null;
-		if (isValidPosition(newPosition)) {
-			if (!isBusy(newPosition)) {
-				moveMessage = new MoveSuccessMessage(newPosition.getX(),
-						newPosition.getY());
-
-				this.worldMap.getWorldMap().put(newPosition,
-						new State(true, pointId));
+	/**
+	 * Try to move point to position (x, y). If coordinates is valid(in range
+	 * [0..99]) and position is free, than point is moved. Else point will not
+	 * moved and reason will be returned.
+	 * 
+	 * @param pointId
+	 * @param x
+	 * @param y
+	 * @return 1 - if moved successfully, 2 - if coordinates are not valid, 3 -
+	 *         if position is busy.
+	 */
+	public int movePoint(int pointId, int x, int y) {
+		int result = 0;
+		synchronized (this) {
+			if (worldMap.isValidCoordinates(x, y)) {
+				if (!worldMap.isBusyPosition(x, y)) {
+					result = MoveResult.MOVE_SUCCESS;
+					this.worldMap.setPosition(x, y, true);
+				} else {
+					result = MoveResult.BUSY_POSITION;
+				}
 			} else {
-				moveMessage = new MoveFailureMessage(
-						MoveFailureMessage.BUSY_POSITION);
+				result = MoveResult.INVALID_POSITION;
 			}
-		} else {
-			moveMessage = new MoveFailureMessage(
-					MoveFailureMessage.INVALID_POSITION);
-		}
-		return moveMessage;
-	}
-
-	private boolean isBusy(WorldPosition position) {
-		State state = this.worldMap.getWorldMap().get(position);
-		return state.isBusy();
-	}
-
-	private boolean isValidPosition(WorldPosition position) {
-		boolean result;
-
-		if (isValidCoordinate(position.getX())
-				&& isValidCoordinate(position.getY())) {
-			result = true;
-		} else {
-			result = false;
-		}
-		return result;
-	}
-
-	private boolean isValidCoordinate(int coordinate) {
-		boolean result = false;
-		if (coordinate > 0 && coordinate < WorldMap.MAP_SIZE) {
-			result = true;
 		}
 		return result;
 	}

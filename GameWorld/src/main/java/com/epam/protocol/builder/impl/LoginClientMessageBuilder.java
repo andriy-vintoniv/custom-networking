@@ -12,14 +12,9 @@ public class LoginClientMessageBuilder implements MessageBuilder {
 	public LoginClientMessage buildMessage(DataInputStream inputStream) {
 		LoginClientMessage message = null;
 		try {
-			// byte messageType = inputStream.readByte();
-			//
-			// if (messageType == ClientMessageType.CM_LOGIN.getId()) {
 			message = new LoginClientMessage();
-
 			String login = inputStream.readUTF();
 			message.setLogin(login);
-			// }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

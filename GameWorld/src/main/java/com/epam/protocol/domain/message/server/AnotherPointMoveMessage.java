@@ -1,9 +1,10 @@
 package com.epam.protocol.domain.message.server;
 
 import com.epam.protocol.domain.message.Message;
+import com.epam.protocol.domain.message.constants.ServerMessageType;
 
 public class AnotherPointMoveMessage implements Message {
-	private static final byte id = 4;
+	private static final byte id = ServerMessageType.SM_ANOTHER_POINT_MOVE;
 	private int pointId;
 	private int x;
 	private int y;

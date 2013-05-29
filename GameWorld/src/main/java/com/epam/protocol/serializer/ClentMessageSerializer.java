@@ -1,7 +1,6 @@
 package com.epam.protocol.serializer;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.math.BigInteger;
 
 import com.epam.protocol.domain.message.client.ChatClientMessage;
 import com.epam.protocol.domain.message.client.LoginClientMessage;
@@ -11,60 +10,70 @@ public class ClentMessageSerializer {
 
 	private final short SIZE_OF_INT = 4;
 
-	private DataOutputStream outputStream;
-
 	public ClentMessageSerializer() {
 	}
 
-	public ClentMessageSerializer(DataOutputStream outputStream) {
-		this.outputStream = outputStream;
+	public byte[] serializeMessage(LoginClientMessage loginClientMessage) {
+		byte[] result = new byte[0];
+
+		int messageLength = loginClientMessage.getLogin().getBytes().length;
+		byte[] messageLengthBytes = BigInteger.valueOf(messageLength)
+				.toByteArray();
+		byte[] messageIdBytes = BigInteger.valueOf(loginClientMessage.getId())
+				.toByteArray();
+		byte[] clientLoginBytes = loginClientMessage.getLogin().getBytes();
+
+		result = concat(result, messageLengthBytes);
+		result = concat(result, messageIdBytes);
+		result = concat(result, clientLoginBytes);
+
+		return result;
 	}
 
-	public void serializeMessage(LoginClientMessage loginClientMessage) {
-		try {
-			int messageLength = loginClientMessage.getLogin().getBytes().length;
-			outputStream.writeShort(messageLength);
-			outputStream.writeByte(loginClientMessage.getId());
-			outputStream.writeUTF(loginClientMessage.getLogin());
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				outputStream.flush();
-			} catch (IOException e) {
-			}
-		}
-	}
+	public byte[] serializeMessage(MoveClientMessage moveClientMessage) {
+		byte[] result = new byte[0];
 
-	public void serializeMessage(MoveClientMessage moveClientMessage) {
 		short messageSize = SIZE_OF_INT * 2;
-		try {
-			outputStream.writeShort(messageSize);
-			outputStream.writeByte(moveClientMessage.getId());
-			outputStream.writeInt(moveClientMessage.getX());
-			outputStream.writeInt(moveClientMessage.getY());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		byte[] messageSizeBytes = BigInteger.valueOf(messageSize).toByteArray();
+		byte[] messageIdBytes = BigInteger.valueOf(moveClientMessage.getId())
+				.toByteArray();
 
+		byte[] xCoordinateBytes = BigInteger.valueOf(moveClientMessage.getX())
+				.toByteArray();
+		byte[] yCoordinateBytes = BigInteger.valueOf(moveClientMessage.getY())
+				.toByteArray();
+
+		result = concat(result, messageSizeBytes);
+		result = concat(result, messageIdBytes);
+		result = concat(result, xCoordinateBytes);
+		result = concat(result, yCoordinateBytes);
+
+		return result;
 	}
 
-	public void serializeMessage(ChatClientMessage chatClientMessage) {
-		try {
-			int messageSize = chatClientMessage.getMessage().getBytes().length;
-			outputStream.writeShort(messageSize);
-			outputStream.writeByte(chatClientMessage.getId());
-			outputStream.writeUTF(chatClientMessage.getMessage());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public byte[] serializeMessage(ChatClientMessage chatClientMessage) {
+		byte[] result = new byte[0];
+
+		int messageSize = chatClientMessage.getMessage().getBytes().length;
+
+		byte[] messageSizeBytes = BigInteger.valueOf(messageSize).toByteArray();
+		byte[] messageIdBytes = BigInteger.valueOf(chatClientMessage.getId())
+				.toByteArray();
+		byte[] messageTextBytes = chatClientMessage.getMessage().getBytes();
+
+		result = concat(result, messageSizeBytes);
+		result = concat(result, messageIdBytes);
+		result = concat(result, messageTextBytes);
+
+		return result;
 	}
 
-	public DataOutputStream getOutputStream() {
-		return outputStream;
-	}
-
-	public void setOutputStream(DataOutputStream outputStream) {
-		this.outputStream = outputStream;
+	private byte[] concat(byte[] first, byte[] second) {
+		int aLen = first.length;
+		int bLen = second.length;
+		byte[] C = new byte[aLen + bLen];
+		System.arraycopy(first, 0, C, 0, aLen);
+		System.arraycopy(second, 0, C, aLen, bLen);
+		return C;
 	}
 }

@@ -1,34 +1,46 @@
 package com.epam.domain;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.BitSet;
 
 public class WorldMap {
 
 	public final static int MAP_SIZE = 100;
 	private static WorldMap instance = new WorldMap();
 
-	private Map<WorldPosition, State> worldMap;
+	private BitSet bitset;
 
 	private WorldMap() {
-		this.worldMap = new HashMap<WorldPosition, State>();
+		bitset = new BitSet(MAP_SIZE * MAP_SIZE);
+	}
 
-		for (int i = 0; i < MAP_SIZE; i++) {
-			for (int j = 0; j < MAP_SIZE; j++) {
-				worldMap.put(new WorldPosition(i, j), new State());
-			}
+	/**
+	 * Sets position to busy or free
+	 * 
+	 * @param x
+	 *            - coordinate
+	 * @param y
+	 *            - coordinate
+	 * @param busy
+	 *            - set true, if position is busy, else - false
+	 */
+	public void setPosition(int x, int y, boolean busy) {
+		this.bitset.set(x * y, busy);
+	}
+
+	public boolean isBusyPosition(int x, int y) {
+		return this.bitset.get(x * y);
+	}
+
+	public boolean isValidCoordinates(int x, int y) {
+		boolean result = false;
+		if ((x > 0 && x < WorldMap.MAP_SIZE)
+				&& (y > 0 && y < WorldMap.MAP_SIZE)) {
+			result = true;
 		}
+		return result;
 	}
 
 	public static WorldMap getInstance() {
 		return instance;
-	}
-
-	public Map<WorldPosition, State> getWorldMap() {
-		return worldMap;
-	}
-
-	public void setWorldMap(Map<WorldPosition, State> worldMap) {
-		this.worldMap = worldMap;
 	}
 }

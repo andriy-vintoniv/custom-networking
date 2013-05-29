@@ -1,9 +1,10 @@
 package com.epam.protocol.domain.message.server;
 
 import com.epam.protocol.domain.message.Message;
+import com.epam.protocol.domain.message.constants.ServerMessageType;
 
 public class MoveSuccessMessage implements Message {
-	private static final byte id = 6;
+	private static final byte id = ServerMessageType.SM_MOVE_SUCCESS;
 	private int x;
 	private int y;
 

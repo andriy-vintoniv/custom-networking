@@ -4,14 +4,15 @@ public class Point {
 
 	private int id;
 	private String name;
-	private String color;
-	private WorldPosition worldPosition;
+	private int color;
+	private int x;
+	private int y;
 
-	public String getColor() {
+	public int getColor() {
 		return color;
 	}
 
-	public void setColor(String color) {
+	public void setColor(int color) {
 		this.color = color;
 	}
 
@@ -31,11 +32,20 @@ public class Point {
 		this.id = id;
 	}
 
-	public WorldPosition getWorldPosition() {
-		return worldPosition;
+	public int getX() {
+		return x;
 	}
 
-	public void setWorldPosition(WorldPosition worldPosition) {
-		this.worldPosition = worldPosition;
+	public void setX(int x) {
+		this.x = x;
 	}
+
+	public int getY() {
+		return y;
+	}
+
+	public void setY(int y) {
+		this.y = y;
+	}
+
 }

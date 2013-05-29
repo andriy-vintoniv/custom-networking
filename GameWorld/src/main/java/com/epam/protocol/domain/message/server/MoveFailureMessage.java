@@ -1,11 +1,10 @@
 package com.epam.protocol.domain.message.server;
 
 import com.epam.protocol.domain.message.Message;
+import com.epam.protocol.domain.message.constants.ServerMessageType;
 
 public class MoveFailureMessage implements Message {
-	public static final int INVALID_POSITION = 1;
-	public static final int BUSY_POSITION = 2;
-	private static final byte ID = 7;
+	private static final byte ID = ServerMessageType.SM_MOVE_FAILURE;
 	private int reason;
 
 	public MoveFailureMessage() {

@@ -1,9 +1,10 @@
 package com.epam.protocol.domain.message.client;
 
 import com.epam.protocol.domain.message.Message;
+import com.epam.protocol.domain.message.constants.ClientMessageType;
 
 public class MoveClientMessage implements Message {
-	private static final byte id = 6;
+	private static final byte id = ClientMessageType.CM_MOVE;
 
 	private int x;
 	private int y;
