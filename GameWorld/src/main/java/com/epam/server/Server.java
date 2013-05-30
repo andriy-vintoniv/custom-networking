@@ -1,20 +1,22 @@
 package com.epam.server;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.epam.protocol.builder.MessageBuilder;
-import com.epam.protocol.builder.impl.LoginClientMessageBuilder;
-import com.epam.protocol.domain.message.client.LoginClientMessage;
+import com.epam.game.receiver.client.ClientChatMessageReceiver;
+import com.epam.game.sender.impl.server.ServerChatMessageSender;
+import com.epam.protocol.builder.impl.ClientChatMessageBuilder;
+import com.epam.protocol.domain.message.client.ChatClientMessage;
+import com.epam.protocol.domain.message.server.ChatServerMessage;
+import com.epam.protocol.serializer.ServerMessageSerializer;
 
 public class Server {
 	public static final int PORT = 95;
 
 	public static void main(String[] args) throws IOException {
-		MessageBuilder messageBuilder = new LoginClientMessageBuilder();
-
 		ServerSocket serverSocket = null;
 
 		try {
@@ -33,16 +35,24 @@ public class Server {
 		}
 
 		DataInputStream dis = new DataInputStream(socket.getInputStream());
+		DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+		ClientChatMessageReceiver clientChatMessageReceiver = new ClientChatMessageReceiver(
+				new ClientChatMessageBuilder(), dis);
+		ServerChatMessageSender serverChatMessageSender = new ServerChatMessageSender(
+				new ServerMessageSerializer(), dos);
 
-		while (true) {
+		startChat(clientChatMessageReceiver, serverChatMessageSender);
 
-			LoginClientMessage loginMessage = (LoginClientMessage) messageBuilder
-					.buildMessage(dis);
-			System.out.println("Message reseived");
-			System.out.println("login " + loginMessage.getLogin());
-		}
+		dis.close();
+		socket.close();
+	}
 
-		// dos.close();
-		// socket.close();
+	private static void startChat(ClientChatMessageReceiver receiver,
+			ServerChatMessageSender sender) {
+		ChatClientMessage chatClientMessage = receiver.receive();
+		ChatServerMessage chatServerMessage = new ChatServerMessage(
+				chatClientMessage.getMessage(), pointId);// where pointId
+															// retrieve from
+		sender.send(chatServerMessage);
 	}
 }

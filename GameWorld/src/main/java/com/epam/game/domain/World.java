@@ -1,8 +1,10 @@
-package com.epam.domain;
+package com.epam.game.domain;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.epam.game.util.Filter;
+import com.epam.protocol.domain.message.Message;
 import com.epam.protocol.domain.message.constants.MoveResult;
 
 public class World {
@@ -56,6 +58,17 @@ public class World {
 			}
 		}
 		return result;
+	}
+
+	public void iterate(Point senderPoint, Filter filter, Message message) {
+
+//		Visitor visitor = new ConcreteVisitor(Message);
+
+//		for (Point receiverPoint : points.values()) {
+//			if (filter.accept(senderPoint, receiverPoint)) {
+//				receiverPoint.accetp(visitor);
+//			}
+//		}
 	}
 
 	public WorldMap getWorldMap() {

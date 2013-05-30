@@ -1,4 +1,4 @@
-package com.epam.domain;
+package com.epam.game.domain;
 
 import java.util.BitSet;
 

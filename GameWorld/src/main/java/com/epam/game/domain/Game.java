@@ -1,8 +1,6 @@
-package com.epam.domain;
+package com.epam.game.domain;
 
 import java.util.List;
-
-import com.epam.domain.Point;
 
 public class Game {
 	private List<Point> users;

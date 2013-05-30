@@ -6,7 +6,8 @@ import java.io.IOException;
 import com.epam.protocol.builder.MessageBuilder;
 import com.epam.protocol.domain.message.client.MoveClientMessage;
 
-public class MoveClientMessageBuilder implements MessageBuilder {
+public class MoveClientMessageBuilder implements
+		MessageBuilder<MoveClientMessage> {
 
 	@Override
 	public MoveClientMessage buildMessage(DataInputStream inputStream) {

@@ -6,7 +6,8 @@ import java.io.IOException;
 import com.epam.protocol.builder.MessageBuilder;
 import com.epam.protocol.domain.message.client.ChatClientMessage;
 
-public class ClientChatMessageBuilder implements MessageBuilder {
+public class ClientChatMessageBuilder implements
+		MessageBuilder<ChatClientMessage> {
 
 	@Override
 	public ChatClientMessage buildMessage(DataInputStream inputStream) {
