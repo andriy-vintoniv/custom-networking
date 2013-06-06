@@ -50,9 +50,9 @@ public class Server {
 	private static void startChat(ClientChatMessageReceiver receiver,
 			ServerChatMessageSender sender) {
 		ChatClientMessage chatClientMessage = receiver.receive();
-		ChatServerMessage chatServerMessage = new ChatServerMessage(
-				chatClientMessage.getMessage(), pointId);// where pointId
-															// retrieve from
-		sender.send(chatServerMessage);
+		// ChatServerMessage chatServerMessage = new ChatServerMessage(
+		// chatClientMessage.getMessage(), pointId);// where pointId
+		// retrieve from
+		// sender.send(chatServerMessage);
 	}
 }
