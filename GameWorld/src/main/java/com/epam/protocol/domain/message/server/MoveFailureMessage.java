@@ -14,7 +14,7 @@ public class MoveFailureMessage implements Message {
 		this.reason = reason;
 	}
 
-	public byte getId() {
+	public byte getType() {
 		return ID;
 	}
 

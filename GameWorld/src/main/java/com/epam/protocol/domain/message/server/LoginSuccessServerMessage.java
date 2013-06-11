@@ -53,7 +53,7 @@ public class LoginSuccessServerMessage implements Message {
 		this.color = color;
 	}
 
-	public byte getId() {
+	public byte getType() {
 		return id;
 	}
 }

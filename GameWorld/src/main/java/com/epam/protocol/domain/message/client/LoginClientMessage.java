@@ -23,7 +23,7 @@ public class LoginClientMessage implements Message {
 		this.login = login;
 	}
 
-	public byte getId() {
+	public byte getType() {
 		return id;
 	}
 }

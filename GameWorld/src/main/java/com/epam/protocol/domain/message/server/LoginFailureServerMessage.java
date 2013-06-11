@@ -23,7 +23,7 @@ public class LoginFailureServerMessage implements Message {
 		this.errorCode = errorCode;
 	}
 
-	public byte getId() {
+	public byte getType() {
 		return id;
 	}
 }

@@ -33,7 +33,7 @@ public class MoveClientMessage implements Message {
 		this.y = y;
 	}
 
-	public byte getId() {
+	public byte getType() {
 		return id;
 	}
 }

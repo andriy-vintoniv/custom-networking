@@ -23,7 +23,7 @@ public class AnotherPoitnInfoMessage implements Message {
 		this.name = name;
 	}
 
-	public byte getId() {
+	public byte getType() {
 		return id;
 	}
 

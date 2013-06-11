@@ -20,7 +20,7 @@ public class ChatClientMessage implements Message {
 		this.message = message;
 	}
 
-	public byte getId() {
+	public byte getType() {
 		return ID;
 	}
 

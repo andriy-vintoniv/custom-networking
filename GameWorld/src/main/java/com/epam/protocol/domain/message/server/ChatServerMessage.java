@@ -16,7 +16,7 @@ public class ChatServerMessage implements Message {
 		this.pointId = pointId;
 	}
 
-	public byte getId() {
+	public byte getType() {
 		return id;
 	}
 

@@ -1,4 +1,4 @@
-package com.epam.server;
+package com.epam.server.nio;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,20 +9,34 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import com.epam.game.domain.Point;
+import com.epam.game.domain.World;
+import com.epam.game.domain.WorldMap;
+import com.epam.protocol.domain.message.constants.ClientMessageType;
+import com.epam.protocol.domain.message.server.LoginFailureServerMessage;
+import com.epam.protocol.domain.message.server.LoginSuccessServerMessage;
+import com.epam.protocol.serializer.ServerMessageSerializer;
 
 public class ServerNIO {
+	private static final int BUFFER_SIZE = 256;
 	public static final int PORT = 95;
 	private static String clientChannel = "clientChannel";
 	private static String serverChannel = "serverChannel";
 	private static String channelType = "channelType";
 
+	private static World world = World.getInstance();
+	private static ChannelContainer channelContainer = ChannelContainer
+			.getInstance();
+
 	public static void main(String[] args) {
+
 		String localhost = "localhost";
 
 		// create a new serversocketchannel. The channel is unbound.
@@ -113,10 +127,9 @@ public class ServerNIO {
 							SelectionKey clientKey = clientSocketChannel
 									.register(selector, SelectionKey.OP_READ,
 											SelectionKey.OP_WRITE);
-							// Map<String, String> clientproperties = new
-							// HashMap<String, String>();
-							// clientproperties.put(channelType, clientChannel);
-							// clientKey.attach(clientproperties);
+							Map<String, String> clientproperties = new HashMap<String, String>();
+							clientproperties.put(channelType, clientChannel);
+							clientKey.attach(clientproperties);
 
 							// write something to the new created client
 							CharBuffer buffer = CharBuffer.wrap("Hello client");
@@ -126,43 +139,126 @@ public class ServerNIO {
 							}
 							buffer.clear();
 						}
-					} else if (((Map<String, Object>) key.attachment())
-							.get(channelType) instanceof Point) {
-						Point point = (Point) key.attachment();
-						System.out.println("Point name: " + point.getName());
-						System.out.println("Point x: " + point.getX());
-						System.out.println("Point y: " + point.getY());
+					} else {
 						// data is available for read
 						// buffer for reading
-						ByteBuffer buffer = ByteBuffer.allocate(20);
+						ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+						Point point = loginClient(key);
+
 						SocketChannel clientChannel = (SocketChannel) key
 								.channel();
-						int bytesRead = 0;
-						if (key.isReadable()) {
-							// the channel is non blocking so keep it open till
-							// the
-							// count is >=0
-							if ((bytesRead = clientChannel.read(buffer)) > 0) {
-								buffer.flip();
-								System.out.println(Charset.defaultCharset()
-										.decode(buffer));
-								buffer.clear();
-							}
-							if (bytesRead < 0) {
-								// the key is automatically invalidated once the
-								// channel is closed
-								clientChannel.close();
-							}
+						if (point != null) {
+							world.addPoint(point);
+							channelContainer.addChannel(clientChannel,
+									point.getName());
 						}
+						// int bytesRead = 0;
+						// if (key.isReadable()) {
+						// // the channel is non blocking so keep it open till
+						// // the
+						// // count is >=0
+						// if ((bytesRead = clientChannel.read(buffer)) > 0) {
+						// buffer.flip();
+						// System.out.println(Charset.defaultCharset()
+						// .decode(buffer));
+						// buffer.clear();
+						// }
+						// if (bytesRead < 0) {
+						// // the key is automatically invalidated once the
+						// // channel is closed
+						// clientChannel.close();
+						// }
+						// }
 					}
 					// once a key is handled, it needs to be removed
 					iterator.remove();
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Tries to login client into server. Generate new point and send Login
+	 * message to client.
+	 * 
+	 * @param clientKey
+	 * @return generated point - if logged in successfully, else - null.
+	 */
+	private static Point loginClient(SelectionKey clientKey) {
+		Point point = null;
+		ServerMessageSerializer serverMessageSerializer = new ServerMessageSerializer();
+		SocketChannel clientChannel = (SocketChannel) clientKey.channel();
+		ByteBuffer byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+		Charset charset = Charset.forName("UTF-8");
+		CharsetDecoder decoder = charset.newDecoder();
+
+		if (clientKey.isReadable()) {
+			try {
+				while (clientChannel.read(byteBuffer) > 0) {
+				}
+				short messageSize = byteBuffer.getShort();
+				byte messageType = byteBuffer.get();
+
+				if (ClientMessageType.CM_LOGIN == messageType) {
+					String clientName = decoder.decode(byteBuffer).toString();
+
+					point = generateNewPoint(clientName);
+
+					if (point != null) {
+						LoginSuccessServerMessage loginSuccessServerMessage = new LoginSuccessServerMessage(
+								point.getId(), point.getX(), point.getY(),
+								point.getColor());
+
+						byte[] serializedLoginSuccessfulMessage = serverMessageSerializer
+								.serializeMessage(loginSuccessServerMessage);
+
+						byteBuffer.put(serializedLoginSuccessfulMessage);
+						byteBuffer.flip();
+						while (byteBuffer.hasRemaining()) {
+							clientChannel.write(byteBuffer);
+						}
+						byteBuffer.clear();
+					} else {
+						LoginFailureServerMessage loginFailureServerMessage = new LoginFailureServerMessage(
+								(byte) 1);
+						byte[] serializedFailureLogonMessage = serverMessageSerializer
+								.serializeMessage(loginFailureServerMessage);
+						byteBuffer.put(serializedFailureLogonMessage);
+						byteBuffer.flip();
+						while (byteBuffer.hasRemaining()) {
+							clientChannel.write(byteBuffer);
+						}
+						byteBuffer.clear();
+					}
+
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return point;
+	}
+
+	/**
+	 * Generate new point with random coordinates and unique id.
+	 * 
+	 * @param name
+	 * @return generated point.
+	 */
+	private static Point generateNewPoint(String name) {
+		Point point = new Point();
+		Random rand = new Random();
+		point.setX(rand.nextInt(WorldMap.MAP_SIZE));
+		point.setY(rand.nextInt(WorldMap.MAP_SIZE));
+		point.setName(name);
+		int pointId = rand.nextInt();
+		while (world.getPoints().containsKey(Integer.valueOf(pointId))) {
+			pointId = rand.nextInt();
+		}
+		point.setId(pointId);
+		return point;
+	}
 }
