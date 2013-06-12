@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.UUID;
@@ -20,6 +21,8 @@ import com.epam.protocol.serializer.ClentMessageSerializer;
 import com.epam.server.Server;
 
 public class Client {
+
+	private static final int BYTE_BUFFER_SIZE = 256;
 
 	public static void main(String[] args) throws IOException {
 
@@ -36,10 +39,15 @@ public class Client {
 			dos = new DataOutputStream(socket.getOutputStream());
 			dis = new DataInputStream(socket.getInputStream());
 
+			byte[] bytes = new byte[BYTE_BUFFER_SIZE];
+			dis.read(bytes);
+			ByteBuffer byteBuffer = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
+			byteBuffer.put(bytes);
+
 			ClientChatMessageSender clientChatMessageSender = new ClientChatMessageSender(
 					new ClentMessageSerializer(), dos);
 			ServerChatMessageReceiver serverChatMessageReceiver = new ServerChatMessageReceiver(
-					dis);
+					byteBuffer);
 
 			startChat(clientChatMessageSender, serverChatMessageReceiver);
 		} catch (UnknownHostException e) {

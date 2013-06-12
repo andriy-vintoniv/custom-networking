@@ -3,12 +3,15 @@ package com.epam.client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.util.UUID;
 
+import com.epam.game.domain.Point;
+import com.epam.protocol.builder.MessageBuilder;
+import com.epam.protocol.builder.ServerMessageBuilderFactory;
 import com.epam.protocol.domain.message.client.LoginClientMessage;
+import com.epam.protocol.domain.message.constants.ServerMessageType;
+import com.epam.protocol.domain.message.server.LoginSuccessServerMessage;
 import com.epam.protocol.serializer.ClentMessageSerializer;
 import com.epam.server.nio.ServerNIO;
 
@@ -16,6 +19,8 @@ public class ClientNIO {
 
 	public static void main(String[] args) {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(512);
+		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		String clientName = args[0];
 
 		try {
 			SocketChannel channel = SocketChannel.open();
@@ -27,8 +32,8 @@ public class ClientNIO {
 				// System.out.println("still connecting");
 			}
 
-			LoginClientMessage loginClientMessage = new LoginClientMessage(UUID
-					.randomUUID().toString());
+			LoginClientMessage loginClientMessage = new LoginClientMessage(
+					clientName);
 
 			// get login message bytes array
 			ClentMessageSerializer clentMessageSerializer = new ClentMessageSerializer();
@@ -45,22 +50,33 @@ public class ClientNIO {
 
 			while (true) {
 				// see if any message has been received
-				ByteBuffer buffer = ByteBuffer.allocate(20);
-				String message = "";
-				while ((channel.read(buffer)) > 0) {
-					// flip the buffer to start reading
-					buffer.flip();
-					message += Charset.defaultCharset().decode(buffer);
-
+				int count = 0;
+				int readBytes = 0;
+				while ((count = channel.read(byteBuffer)) > 0) {
+					readBytes += count;
 				}
-				if (message.length() > 0) {
-					System.out.println(message);
-					// write some data into the channel
-					CharBuffer buffer2 = CharBuffer.wrap("Hello Server");
-					while (buffer2.hasRemaining()) {
-						channel.write(Charset.defaultCharset().encode(buffer2));
+				if (readBytes > 0) {
+					byteBuffer.flip();
+					short messageSize = byteBuffer.getShort();
+					byte messageType = byteBuffer.get();
+					if (messageType == ServerMessageType.SM_LOGIN_SUCCESS) {
+						MessageBuilder<?> loginSuccessfulMessageBuilder = ServerMessageBuilderFactory
+								.getMessageBuilder(messageType);
+
+						LoginSuccessServerMessage loginSuccessServerMessage = (LoginSuccessServerMessage) loginSuccessfulMessageBuilder
+								.buildMessage(byteBuffer);
+						Point point = new Point();
+						point.setName(clientName);
+						point.setColor(loginSuccessServerMessage.getColor());
+						point.setId(loginSuccessServerMessage.getClientId());
+						point.setX(loginSuccessServerMessage.getX());
+						point.setY(loginSuccessServerMessage.getY());
+
+						System.out.println("Loged in successfully");
+						System.out.println("point(" + point.getX() + ","
+								+ point.getY() + ")");
+						byteBuffer.clear();
 					}
-					message = "";
 				}
 			}
 		} catch (IOException e) {

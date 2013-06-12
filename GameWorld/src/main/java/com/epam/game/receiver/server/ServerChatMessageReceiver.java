@@ -1,26 +1,26 @@
 package com.epam.game.receiver.server;
 
-import java.io.DataInputStream;
+import java.nio.ByteBuffer;
 
 import com.epam.game.receiver.ServerMessageReceiver;
-import com.epam.protocol.builder.impl.ServerChatMessageBuilder;
+import com.epam.protocol.builder.impl.server.ServerChatMessageBuilder;
 import com.epam.protocol.domain.message.server.ChatServerMessage;
 
 public class ServerChatMessageReceiver implements
 		ServerMessageReceiver<ChatServerMessage> {
 
 	private ServerChatMessageBuilder serverChatMessageBuilder;
-	private DataInputStream dataInputStream;
+	private ByteBuffer byteBuffer;
 
-	public ServerChatMessageReceiver(DataInputStream dis) {
-		this.setDataInputStream(dis);
+	public ServerChatMessageReceiver(ByteBuffer byteBuffer) {
+		this.byteBuffer = byteBuffer;
 		this.serverChatMessageBuilder = new ServerChatMessageBuilder();
 	}
 
 	@Override
 	public ChatServerMessage receive() {
 		ChatServerMessage message = serverChatMessageBuilder
-				.buildMessage(dataInputStream);
+				.buildMessage(byteBuffer);
 		return message;
 	}
 
@@ -32,13 +32,4 @@ public class ServerChatMessageReceiver implements
 			ServerChatMessageBuilder serverChatMessageBuilder) {
 		this.serverChatMessageBuilder = serverChatMessageBuilder;
 	}
-
-	public DataInputStream getDataInputStream() {
-		return dataInputStream;
-	}
-
-	public void setDataInputStream(DataInputStream dataInputStream) {
-		this.dataInputStream = dataInputStream;
-	}
-
 }

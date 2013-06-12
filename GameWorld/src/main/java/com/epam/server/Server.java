@@ -5,15 +5,16 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 import com.epam.game.receiver.client.ClientChatMessageReceiver;
 import com.epam.game.sender.impl.server.ServerChatMessageSender;
-import com.epam.protocol.builder.impl.ClientChatMessageBuilder;
+import com.epam.protocol.builder.impl.client.ClientChatMessageBuilder;
 import com.epam.protocol.domain.message.client.ChatClientMessage;
-import com.epam.protocol.domain.message.server.ChatServerMessage;
 import com.epam.protocol.serializer.ServerMessageSerializer;
 
 public class Server {
+	private static final int BYTE_BUFFER_SIZE = 256;
 	public static final int PORT = 95;
 
 	public static void main(String[] args) throws IOException {
@@ -36,8 +37,13 @@ public class Server {
 
 		DataInputStream dis = new DataInputStream(socket.getInputStream());
 		DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+
+		byte[] bytes = new byte[BYTE_BUFFER_SIZE];
+		dis.read(bytes);
+		ByteBuffer byteBuffer = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
+		byteBuffer.put(bytes);
 		ClientChatMessageReceiver clientChatMessageReceiver = new ClientChatMessageReceiver(
-				new ClientChatMessageBuilder(), dis);
+				new ClientChatMessageBuilder(), byteBuffer);
 		ServerChatMessageSender serverChatMessageSender = new ServerChatMessageSender(
 				new ServerMessageSerializer(), dos);
 

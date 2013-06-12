@@ -1,8 +1,8 @@
 package com.epam.protocol.builder;
 
-import com.epam.protocol.builder.impl.ClientChatMessageBuilder;
-import com.epam.protocol.builder.impl.LoginClientMessageBuilder;
-import com.epam.protocol.builder.impl.MoveClientMessageBuilder;
+import com.epam.protocol.builder.impl.client.ClientChatMessageBuilder;
+import com.epam.protocol.builder.impl.client.LoginClientMessageBuilder;
+import com.epam.protocol.builder.impl.client.MoveClientMessageBuilder;
 import com.epam.protocol.domain.message.Message;
 import com.epam.protocol.domain.message.constants.ClientMessageType;
 
