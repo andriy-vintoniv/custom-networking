@@ -7,6 +7,9 @@ import java.util.Map;
 import com.epam.protocol.domain.message.constants.ClientMessageType;
 import com.epam.protocol.handler.MessageHandler;
 import com.epam.protocol.handler.impl.SingleMessageHandler;
+import com.epam.server.Connection;
+import com.epam.server.ConnectionContainer;
+import com.epam.server.MessageSender;
 
 public class ClientMessageHandler implements MessageHandler {
 
@@ -17,9 +20,12 @@ public class ClientMessageHandler implements MessageHandler {
 	}
 
 	@Override
-	public ByteBuffer handle(ByteBuffer byteBuffer, byte messageType) {
+	public ByteBuffer handle(ByteBuffer byteBuffer, byte messageType,
+			ConnectionContainer<?> connectionContainer,
+			MessageSender<?> messageSender, Connection<?> connection) {
 		SingleMessageHandler messageHandler = handlers.get(messageType);
-		return messageHandler.handle(byteBuffer);
+		return messageHandler.handle(byteBuffer, connectionContainer,
+				messageSender, connection);
 	}
 
 	private void initHandlers() {

@@ -9,9 +9,16 @@ import java.nio.channels.SocketChannel;
 import com.epam.protocol.domain.message.client.LoginClientMessage;
 import com.epam.protocol.handler.impl.server.ServerMessageHandler;
 import com.epam.protocol.serializer.ClentMessageSerializer;
+import com.epam.server.nio.ChannelContainer;
+import com.epam.server.nio.NIOConnection;
 import com.epam.server.nio.ServerNIO;
+import com.epam.server.nio.sender.NIOMessageSender;
 
 public class ClientNIO {
+
+	private static ChannelContainer channelContainer = ChannelContainer
+			.getInstance();
+	private static NIOMessageSender messageSender = new NIOMessageSender();
 
 	public static void main(String[] args) {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(512);
@@ -57,28 +64,9 @@ public class ClientNIO {
 					byteBuffer.getShort(); // read message size
 					byte messageType = byteBuffer.get();
 
-					serverMessageHandler.handle(byteBuffer, messageType);
-					// if (messageType == ServerMessageType.SM_LOGIN_SUCCESS) {
-					// MessageBuilder<?> loginSuccessfulMessageBuilder =
-					// ServerMessageBuilderFactory
-					// .getMessageBuilder(messageType);
-					//
-					// LoginSuccessServerMessage loginSuccessServerMessage =
-					// (LoginSuccessServerMessage) loginSuccessfulMessageBuilder
-					// .buildMessage(byteBuffer);
-					// Point point = new Point();
-					// point.setName(clientName);
-					// point.setColor(loginSuccessServerMessage.getColor());
-					// point.setId(loginSuccessServerMessage.getClientId());
-					// point.setX(loginSuccessServerMessage.getX());
-					// point.setY(loginSuccessServerMessage.getY());
-					//
-					// System.out.println("Loged in successfully");
-					// System.out.println(point.getName());
-					// System.out.println("point(" + point.getX() + ","
-					// + point.getY() + ")");
-					// byteBuffer.clear();
-					// }
+					NIOConnection connection = new NIOConnection(channel);
+					serverMessageHandler.handle(byteBuffer, messageType,
+							channelContainer, messageSender, connection);
 				}
 			}
 		} catch (IOException e) {

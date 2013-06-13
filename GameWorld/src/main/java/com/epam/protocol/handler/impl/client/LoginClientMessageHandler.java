@@ -9,19 +9,23 @@ import java.util.Random;
 import com.epam.game.domain.Point;
 import com.epam.game.domain.World;
 import com.epam.game.domain.WorldMap;
+import com.epam.protocol.domain.message.server.AnotherPoitnInfoServerMessage;
 import com.epam.protocol.domain.message.server.LoginFailureServerMessage;
 import com.epam.protocol.domain.message.server.LoginSuccessServerMessage;
 import com.epam.protocol.handler.impl.SingleMessageHandler;
-import com.epam.protocol.serializer.ServerMessageSerializer;
+import com.epam.server.Connection;
+import com.epam.server.ConnectionContainer;
+import com.epam.server.MessageSender;
 
 class LoginClientMessageHandler implements SingleMessageHandler {
 
 	private World world = World.getInstance();
 
 	@Override
-	public ByteBuffer handle(ByteBuffer byteBuffer) {
+	public ByteBuffer handle(ByteBuffer byteBuffer,
+			ConnectionContainer<?> connectionContainer,
+			MessageSender<?> messageSender, Connection<?> connection) {
 		Point point = null;
-		ServerMessageSerializer serverMessageSerializer = new ServerMessageSerializer();
 		Charset charset = Charset.forName("UTF-8");
 		CharsetDecoder decoder = charset.newDecoder();
 
@@ -33,28 +37,39 @@ class LoginClientMessageHandler implements SingleMessageHandler {
 
 			if (point != null) {
 				world.addPoint(point);
+				int pointId = point.getId();
 				LoginSuccessServerMessage loginSuccessServerMessage = new LoginSuccessServerMessage(
-						point.getId(), point.getX(), point.getY(),
-						point.getColor());
-
-				byte[] serializedLoginSuccessfulMessage = serverMessageSerializer
-						.serializeMessage(loginSuccessServerMessage);
-				byteBuffer.clear();
-				byteBuffer.put(serializedLoginSuccessfulMessage);
-				byteBuffer.flip();
+						pointId, point.getX(), point.getY(), point.getColor());
+				// Object connection =
+				// connectionContainer.getConnection(pointId);
+				messageSender.send(pointId, loginSuccessServerMessage,
+						connection);
+				connectionContainer.addConnection(pointId, connection);
 			} else {
 				LoginFailureServerMessage loginFailureServerMessage = new LoginFailureServerMessage(
 						(byte) 1);
-				byte[] serializedFailureLoginMessage = serverMessageSerializer
-						.serializeMessage(loginFailureServerMessage);
-				byteBuffer.put(serializedFailureLoginMessage);
-				byteBuffer.flip();
+				// TODO: send login failure message. problem is where to get
+				// connection to send.
+
+				// byte[] serializedFailureLoginMessage =
+				// serverMessageSerializer
+				// .serializeMessage(loginFailureServerMessage);
+				// byteBuffer.put(serializedFailureLoginMessage);
+				// byteBuffer.flip();
 			}
 		} catch (CharacterCodingException e) {
 			e.printStackTrace();
 		}
 
 		// TODO: send to all visible points another point info message
+
+		AnotherPoitnInfoServerMessage anotherPoitnInfoServerMessage = new AnotherPoitnInfoServerMessage(
+				point.getId(), point.getX(), point.getY(), point.getColor(),
+				point.getName());
+
+		messageSender.send(point.getId(), anotherPoitnInfoServerMessage,
+				connectionContainer);
+
 		return byteBuffer;
 	}
 

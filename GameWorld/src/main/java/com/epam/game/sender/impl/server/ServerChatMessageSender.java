@@ -6,9 +6,9 @@ import java.util.Collection;
 import com.epam.game.domain.Point;
 import com.epam.game.domain.World;
 import com.epam.game.sender.ServerMessageSender;
-import com.epam.game.util.Filter;
 import com.epam.protocol.domain.message.server.ChatServerMessage;
 import com.epam.protocol.serializer.ServerMessageSerializer;
+import com.epam.server.util.Filter;
 
 public class ServerChatMessageSender implements
 		ServerMessageSender<ChatServerMessage> {

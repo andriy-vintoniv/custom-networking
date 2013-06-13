@@ -4,7 +4,9 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ChannelContainer {
+import com.epam.server.ConnectionContainer;
+
+public class ChannelContainer implements ConnectionContainer<SocketChannel> {
 
 	private Map<Integer, SocketChannel> channels;
 	private static ChannelContainer instance = new ChannelContainer();
@@ -13,7 +15,8 @@ public class ChannelContainer {
 		channels = new HashMap<Integer, SocketChannel>();
 	}
 
-	public void addChannel(SocketChannel channel, Integer pointId) {
+	@Override
+	public void addConnection(Integer pointId, SocketChannel channel) {
 		channels.put(pointId, channel);
 	}
 
@@ -21,8 +24,9 @@ public class ChannelContainer {
 		return instance;
 	}
 
-	public SocketChannel getChannel(String clientName) {
-		return channels.get(clientName);
+	@Override
+	public SocketChannel getConnection(Integer pointId) {
+		return channels.get(pointId);
 	}
 
 	public Map<Integer, SocketChannel> getChannels() {

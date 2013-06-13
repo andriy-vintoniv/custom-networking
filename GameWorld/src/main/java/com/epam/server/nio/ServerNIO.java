@@ -13,16 +13,17 @@ import java.util.Set;
 
 import com.epam.protocol.domain.message.constants.ClientMessageType;
 import com.epam.protocol.handler.impl.client.ClientMessageHandler;
+import com.epam.server.nio.sender.NIOMessageSender;
 
 public class ServerNIO {
 	private static final int POINT_ID_POSITION = 3;
 	private static final int BUFFER_SIZE = 256;
 	public static final int PORT = 95;
-	private static String CLIENT_CHANNEL = "clientChannel";
 	private final static String SERVER_CHANNEL = "serverChannel";
 
 	private static ChannelContainer channelContainer = ChannelContainer
 			.getInstance();
+	private static NIOMessageSender messageSender = new NIOMessageSender();
 
 	public static void main(String[] args) {
 
@@ -58,10 +59,9 @@ public class ServerNIO {
 
 						if (clientSocketChannel != null) {
 							clientSocketChannel.configureBlocking(false);
-							SelectionKey clientKey = clientSocketChannel
+							clientSocketChannel
 									.register(selector, SelectionKey.OP_READ,
 											SelectionKey.OP_WRITE);
-							clientKey.attach(CLIENT_CHANNEL);
 						}
 					} else {
 						loginClient(key);
@@ -84,6 +84,7 @@ public class ServerNIO {
 	private static void loginClient(SelectionKey clientKey) {
 		ClientMessageHandler clientMessageHandler = new ClientMessageHandler();
 		SocketChannel clientChannel = (SocketChannel) clientKey.channel();
+
 		ByteBuffer byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -99,21 +100,19 @@ public class ServerNIO {
 					byteBuffer.getShort(); // read message size
 					byte messageType = byteBuffer.get();
 
+					NIOConnection connection = new NIOConnection(clientChannel);
+
 					ByteBuffer handledByteBuffer = clientMessageHandler.handle(
-							byteBuffer, messageType);
+							byteBuffer, messageType, channelContainer,
+							messageSender, connection);
 					if (messageType == ClientMessageType.CM_LOGIN) {
 						// get point identifier to map channel with point
 						int pointId = handledByteBuffer
 								.getInt(POINT_ID_POSITION);
 						handledByteBuffer.rewind();
-						channelContainer.addChannel(clientChannel, pointId);
+						channelContainer.addConnection(pointId, clientChannel);
 					}
 
-					if (handledByteBuffer != null) {
-						while (handledByteBuffer.hasRemaining()) {
-							clientChannel.write(handledByteBuffer);
-						}
-					}
 					handledByteBuffer.clear();
 
 				}

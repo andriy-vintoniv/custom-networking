@@ -6,11 +6,16 @@ import com.epam.game.domain.Point;
 import com.epam.protocol.builder.impl.server.LoginSuccessMessageBuilder;
 import com.epam.protocol.domain.message.server.LoginSuccessServerMessage;
 import com.epam.protocol.handler.impl.SingleMessageHandler;
+import com.epam.server.Connection;
+import com.epam.server.ConnectionContainer;
+import com.epam.server.MessageSender;
 
 class LoginSuccessServerMessageHandler implements SingleMessageHandler {
 
 	@Override
-	public ByteBuffer handle(ByteBuffer byteBuffer) {
+	public ByteBuffer handle(ByteBuffer byteBuffer,
+			ConnectionContainer<?> connectionContainer,
+			MessageSender<?> messageSender, Connection<?> connection) {
 		LoginSuccessMessageBuilder loginSuccessMessageBuilder = new LoginSuccessMessageBuilder();
 
 		LoginSuccessServerMessage loginSuccessServerMessage = loginSuccessMessageBuilder

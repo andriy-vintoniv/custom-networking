@@ -1,4 +1,4 @@
-package com.epam.game.util;
+package com.epam.server.util;
 
 import com.epam.game.domain.Point;
 

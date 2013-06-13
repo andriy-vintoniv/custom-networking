@@ -3,6 +3,7 @@ package com.epam.protocol.serializer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.epam.protocol.domain.message.Message;
 import com.epam.protocol.domain.message.client.ChatClientMessage;
 import com.epam.protocol.domain.message.client.LoginClientMessage;
 import com.epam.protocol.domain.message.client.MoveClientMessage;
@@ -20,7 +21,21 @@ public class ClentMessageSerializer {
 		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	public byte[] serializeMessage(LoginClientMessage loginClientMessage) {
+	public byte[] serializeMessage(Message message) {
+		byte[] bytes = null;
+		if (message instanceof ChatClientMessage) {
+			bytes = serializeChatClientMessage((ChatClientMessage) message);
+		} else if (message instanceof LoginClientMessage) {
+			bytes = serializeLoginClientMessage((LoginClientMessage) message);
+		} else if (message instanceof MoveClientMessage) {
+			bytes = serializeMoveClientMessage((MoveClientMessage) message);
+		}
+
+		return bytes;
+	}
+
+	public byte[] serializeLoginClientMessage(
+			LoginClientMessage loginClientMessage) {
 		int messageLength = loginClientMessage.getLogin().getBytes().length
 				+ SIZE_OF_BYTE;
 
@@ -33,7 +48,7 @@ public class ClentMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(MoveClientMessage moveClientMessage) {
+	public byte[] serializeMoveClientMessage(MoveClientMessage moveClientMessage) {
 		short messageSize = SIZE_OF_INT * 2 + SIZE_OF_BYTE;
 		byteBuffer.putShort(messageSize);
 		byteBuffer.put(moveClientMessage.getType());
@@ -45,7 +60,7 @@ public class ClentMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(ChatClientMessage chatClientMessage) {
+	public byte[] serializeChatClientMessage(ChatClientMessage chatClientMessage) {
 		int messageSize = chatClientMessage.getMessage().getBytes().length
 				+ SIZE_OF_BYTE;
 		byteBuffer.putShort((short) messageSize);

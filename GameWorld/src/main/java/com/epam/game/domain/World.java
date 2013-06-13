@@ -3,9 +3,9 @@ package com.epam.game.domain;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.epam.game.util.Filter;
 import com.epam.protocol.domain.message.Message;
 import com.epam.protocol.domain.message.constants.MoveResult;
+import com.epam.server.util.Filter;
 
 public class World {
 	private final static World instance = new World();
@@ -26,6 +26,10 @@ public class World {
 		this.points.put(Integer.valueOf(point.getId()), point);
 	}
 
+	public Point getPoint(Integer pointId){
+		return points.get(pointId);
+	}
+	
 	public void removePoint(Integer pointId) {
 		if (points.containsKey(pointId)) {
 			points.remove(pointId);

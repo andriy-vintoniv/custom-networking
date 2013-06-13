@@ -3,6 +3,7 @@ package com.epam.protocol.serializer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.epam.protocol.domain.message.Message;
 import com.epam.protocol.domain.message.server.AnotherPointDeleteServerMessage;
 import com.epam.protocol.domain.message.server.AnotherPointMoveServerMessage;
 import com.epam.protocol.domain.message.server.AnotherPoitnInfoServerMessage;
@@ -14,7 +15,7 @@ import com.epam.protocol.domain.message.server.MoveSuccessServerMessage;
 
 public class ServerMessageSerializer {
 
-	private static final int BUFFER_SIZE = 256;
+	private static final int BUFFER_SIZE = 512;
 	private static final short SIZE_OF_INT = 4;
 	private static final short SIZE_OF_BYTE = 1;
 
@@ -25,7 +26,32 @@ public class ServerMessageSerializer {
 		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	public byte[] serializeMessage(LoginSuccessServerMessage message) {
+	public byte[] serializeMessage(Message message) {
+		byte[] bytes = null;
+
+		if (message instanceof LoginSuccessServerMessage) {
+			bytes = serializeLoginSuccessServerMessage((LoginSuccessServerMessage) message);
+		} else if (message instanceof LoginFailureServerMessage) {
+			bytes = serializeLoginFailureServerMessage((LoginFailureServerMessage) message);
+		} else if (message instanceof ChatServerMessage) {
+			bytes = serializeChatServerMessage((ChatServerMessage) message);
+		} else if (message instanceof AnotherPoitnInfoServerMessage) {
+			bytes = serializeAnotherPoitnInfoServerMessage((AnotherPoitnInfoServerMessage) message);
+		} else if (message instanceof AnotherPointDeleteServerMessage) {
+			bytes = serializeAnotherPointDeleteServerMessage((AnotherPointDeleteServerMessage) message);
+		} else if (message instanceof AnotherPointMoveServerMessage) {
+			bytes = serializeAnotherPointMoveServerMessage((AnotherPointMoveServerMessage) message);
+		} else if (message instanceof MoveSuccessServerMessage) {
+			bytes = serializeMoveSuccessServerMessage((MoveSuccessServerMessage) message);
+		} else if (message instanceof MoveFailureServerMessage) {
+			bytes = serializeMoveFailureServerMessage((MoveFailureServerMessage) message);
+		}
+
+		return bytes;
+	}
+
+	public byte[] serializeLoginSuccessServerMessage(
+			LoginSuccessServerMessage message) {
 		int messageSize = SIZE_OF_INT * 4 + SIZE_OF_BYTE;
 		byteBuffer.putShort((short) messageSize);
 		byteBuffer.put(message.getType());
@@ -40,7 +66,8 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(LoginFailureServerMessage message) {
+	public byte[] serializeLoginFailureServerMessage(
+			LoginFailureServerMessage message) {
 		int messageSize = SIZE_OF_BYTE + SIZE_OF_BYTE;
 
 		byteBuffer.putShort((short) messageSize);
@@ -53,7 +80,7 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(ChatServerMessage message) {
+	public byte[] serializeChatServerMessage(ChatServerMessage message) {
 		int messageTextSize = message.getMessage().getBytes().length;
 		short messageSize = (short) (SIZE_OF_BYTE + SIZE_OF_BYTE + SIZE_OF_INT + messageTextSize);
 
@@ -68,7 +95,8 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(AnotherPoitnInfoServerMessage message) {
+	public byte[] serializeAnotherPoitnInfoServerMessage(
+			AnotherPoitnInfoServerMessage message) {
 		int pointNameSize = message.getName().getBytes().length;
 		short messageSize = (short) (SIZE_OF_BYTE + SIZE_OF_INT * 4 + pointNameSize);
 
@@ -86,7 +114,8 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(AnotherPointDeleteServerMessage message) {
+	public byte[] serializeAnotherPointDeleteServerMessage(
+			AnotherPointDeleteServerMessage message) {
 		short messageSize = SIZE_OF_BYTE + SIZE_OF_INT;
 
 		byteBuffer.putShort(messageSize);
@@ -99,7 +128,8 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(AnotherPointMoveServerMessage message) {
+	public byte[] serializeAnotherPointMoveServerMessage(
+			AnotherPointMoveServerMessage message) {
 		short messageSize = SIZE_OF_BYTE + SIZE_OF_INT * 3;
 
 		byteBuffer.putShort(messageSize);
@@ -114,7 +144,8 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(MoveFailureServerMessage message) {
+	public byte[] serializeMoveFailureServerMessage(
+			MoveFailureServerMessage message) {
 		short messageSize = SIZE_OF_BYTE + SIZE_OF_INT;
 
 		byteBuffer.putShort(messageSize);
@@ -127,7 +158,8 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(MoveSuccessServerMessage message) {
+	public byte[] serializeMoveSuccessServerMessage(
+			MoveSuccessServerMessage message) {
 		short messageSize = SIZE_OF_BYTE + SIZE_OF_INT * 2;
 
 		byteBuffer.putShort(messageSize);
