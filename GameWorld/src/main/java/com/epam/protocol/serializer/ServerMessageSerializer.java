@@ -3,14 +3,14 @@ package com.epam.protocol.serializer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import com.epam.protocol.domain.message.server.AnotherPointDeleteMessage;
-import com.epam.protocol.domain.message.server.AnotherPointMoveMessage;
-import com.epam.protocol.domain.message.server.AnotherPoitnInfoMessage;
+import com.epam.protocol.domain.message.server.AnotherPointDeleteServerMessage;
+import com.epam.protocol.domain.message.server.AnotherPointMoveServerMessage;
+import com.epam.protocol.domain.message.server.AnotherPoitnInfoServerMessage;
 import com.epam.protocol.domain.message.server.ChatServerMessage;
 import com.epam.protocol.domain.message.server.LoginFailureServerMessage;
 import com.epam.protocol.domain.message.server.LoginSuccessServerMessage;
-import com.epam.protocol.domain.message.server.MoveFailureMessage;
-import com.epam.protocol.domain.message.server.MoveSuccessMessage;
+import com.epam.protocol.domain.message.server.MoveFailureServerMessage;
+import com.epam.protocol.domain.message.server.MoveSuccessServerMessage;
 
 public class ServerMessageSerializer {
 
@@ -68,7 +68,7 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(AnotherPoitnInfoMessage message) {
+	public byte[] serializeMessage(AnotherPoitnInfoServerMessage message) {
 		int pointNameSize = message.getName().getBytes().length;
 		short messageSize = (short) (SIZE_OF_BYTE + SIZE_OF_INT * 4 + pointNameSize);
 
@@ -86,7 +86,7 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(AnotherPointDeleteMessage message) {
+	public byte[] serializeMessage(AnotherPointDeleteServerMessage message) {
 		short messageSize = SIZE_OF_BYTE + SIZE_OF_INT;
 
 		byteBuffer.putShort(messageSize);
@@ -99,7 +99,7 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(AnotherPointMoveMessage message) {
+	public byte[] serializeMessage(AnotherPointMoveServerMessage message) {
 		short messageSize = SIZE_OF_BYTE + SIZE_OF_INT * 3;
 
 		byteBuffer.putShort(messageSize);
@@ -114,7 +114,7 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(MoveFailureMessage message) {
+	public byte[] serializeMessage(MoveFailureServerMessage message) {
 		short messageSize = SIZE_OF_BYTE + SIZE_OF_INT;
 
 		byteBuffer.putShort(messageSize);
@@ -127,7 +127,7 @@ public class ServerMessageSerializer {
 		return bytes;
 	}
 
-	public byte[] serializeMessage(MoveSuccessMessage message) {
+	public byte[] serializeMessage(MoveSuccessServerMessage message) {
 		short messageSize = SIZE_OF_BYTE + SIZE_OF_INT * 2;
 
 		byteBuffer.putShort(messageSize);

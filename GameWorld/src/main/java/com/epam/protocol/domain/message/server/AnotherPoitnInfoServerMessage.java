@@ -3,7 +3,7 @@ package com.epam.protocol.domain.message.server;
 import com.epam.protocol.domain.message.Message;
 import com.epam.protocol.domain.message.constants.ServerMessageType;
 
-public class AnotherPoitnInfoMessage implements Message {
+public class AnotherPoitnInfoServerMessage implements Message {
 	private static final byte id = ServerMessageType.SM_ANOTHER_POINT_INFO;
 	private int pointId;
 	private int x;
@@ -11,10 +11,10 @@ public class AnotherPoitnInfoMessage implements Message {
 	private int color;
 	private String name;
 
-	public AnotherPoitnInfoMessage() {
+	public AnotherPoitnInfoServerMessage() {
 	}
 
-	public AnotherPoitnInfoMessage(int pointId, int x, int y, int color,
+	public AnotherPoitnInfoServerMessage(int pointId, int x, int y, int color,
 			String name) {
 		this.pointId = pointId;
 		this.x = x;

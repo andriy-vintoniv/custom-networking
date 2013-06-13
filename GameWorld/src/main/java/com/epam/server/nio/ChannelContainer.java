@@ -6,15 +6,15 @@ import java.util.Map;
 
 public class ChannelContainer {
 
-	private Map<String, SocketChannel> channels;
+	private Map<Integer, SocketChannel> channels;
 	private static ChannelContainer instance = new ChannelContainer();
 
 	private ChannelContainer() {
-		channels = new HashMap<String, SocketChannel>();
+		channels = new HashMap<Integer, SocketChannel>();
 	}
 
-	public void addChannel(SocketChannel channel, String clientName) {
-		channels.put(clientName, channel);
+	public void addChannel(SocketChannel channel, Integer pointId) {
+		channels.put(pointId, channel);
 	}
 
 	public static ChannelContainer getInstance() {
@@ -25,11 +25,11 @@ public class ChannelContainer {
 		return channels.get(clientName);
 	}
 
-	public Map<String, SocketChannel> getChannels() {
+	public Map<Integer, SocketChannel> getChannels() {
 		return channels;
 	}
 
-	public void setChannels(Map<String, SocketChannel> channels) {
+	public void setChannels(Map<Integer, SocketChannel> channels) {
 		this.channels = channels;
 	}
 

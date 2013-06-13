@@ -8,27 +8,19 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Set;
 
-import com.epam.game.domain.Point;
-import com.epam.game.domain.World;
-import com.epam.game.domain.WorldMap;
 import com.epam.protocol.domain.message.constants.ClientMessageType;
-import com.epam.protocol.domain.message.server.LoginFailureServerMessage;
-import com.epam.protocol.domain.message.server.LoginSuccessServerMessage;
-import com.epam.protocol.serializer.ServerMessageSerializer;
+import com.epam.protocol.handler.impl.client.ClientMessageHandler;
 
 public class ServerNIO {
+	private static final int POINT_ID_POSITION = 3;
 	private static final int BUFFER_SIZE = 256;
 	public static final int PORT = 95;
 	private static String CLIENT_CHANNEL = "clientChannel";
 	private final static String SERVER_CHANNEL = "serverChannel";
 
-	private static World world = World.getInstance();
 	private static ChannelContainer channelContainer = ChannelContainer
 			.getInstance();
 
@@ -72,15 +64,7 @@ public class ServerNIO {
 							clientKey.attach(CLIENT_CHANNEL);
 						}
 					} else {
-						Point point = loginClient(key);
-
-						SocketChannel clientChannel = (SocketChannel) key
-								.channel();
-						if (point != null) {
-							world.addPoint(point);
-							channelContainer.addChannel(clientChannel,
-									point.getName());
-						}
+						loginClient(key);
 					}
 					iterator.remove();
 				}
@@ -97,14 +81,11 @@ public class ServerNIO {
 	 * @param clientKey
 	 * @return generated point - if logged in successfully, else - null.
 	 */
-	private static Point loginClient(SelectionKey clientKey) {
-		Point point = null;
-		ServerMessageSerializer serverMessageSerializer = new ServerMessageSerializer();
+	private static void loginClient(SelectionKey clientKey) {
+		ClientMessageHandler clientMessageHandler = new ClientMessageHandler();
 		SocketChannel clientChannel = (SocketChannel) clientKey.channel();
 		ByteBuffer byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		Charset charset = Charset.forName("UTF-8");
-		CharsetDecoder decoder = charset.newDecoder();
 
 		if (clientKey.isReadable()) {
 			try {
@@ -115,70 +96,30 @@ public class ServerNIO {
 				}
 				if (readBytes > 0) {
 					byteBuffer.flip();
-					short messageSize = byteBuffer.getShort();
+					byteBuffer.getShort(); // read message size
 					byte messageType = byteBuffer.get();
 
-					if (ClientMessageType.CM_LOGIN == messageType) {
-						String clientName = decoder.decode(byteBuffer)
-								.toString();
+					ByteBuffer handledByteBuffer = clientMessageHandler.handle(
+							byteBuffer, messageType);
+					if (messageType == ClientMessageType.CM_LOGIN) {
+						// get point identifier to map channel with point
+						int pointId = handledByteBuffer
+								.getInt(POINT_ID_POSITION);
+						handledByteBuffer.rewind();
+						channelContainer.addChannel(clientChannel, pointId);
+					}
 
-						point = generateNewPoint(clientName);
-
-						if (point != null) {
-							LoginSuccessServerMessage loginSuccessServerMessage = new LoginSuccessServerMessage(
-									point.getId(), point.getX(), point.getY(),
-									point.getColor());
-
-							byte[] serializedLoginSuccessfulMessage = serverMessageSerializer
-									.serializeMessage(loginSuccessServerMessage);
-							byteBuffer.clear();
-							// byteBuffer.flip();
-							byteBuffer.put(serializedLoginSuccessfulMessage);
-							byteBuffer.flip();
-							while (byteBuffer.hasRemaining()) {
-								clientChannel.write(byteBuffer);
-							}
-							byteBuffer.clear();
-						} else {
-							LoginFailureServerMessage loginFailureServerMessage = new LoginFailureServerMessage(
-									(byte) 1);
-							byte[] serializedFailureLogonMessage = serverMessageSerializer
-									.serializeMessage(loginFailureServerMessage);
-							byteBuffer.put(serializedFailureLogonMessage);
-							byteBuffer.flip();
-							while (byteBuffer.hasRemaining()) {
-								clientChannel.write(byteBuffer);
-							}
-							byteBuffer.clear();
+					if (handledByteBuffer != null) {
+						while (handledByteBuffer.hasRemaining()) {
+							clientChannel.write(handledByteBuffer);
 						}
 					}
+					handledByteBuffer.clear();
+
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-
-		return point;
-	}
-
-	/**
-	 * Generate new point with random coordinates and unique id.
-	 * 
-	 * @param name
-	 * @return generated point.
-	 */
-	private static Point generateNewPoint(String name) {
-		Point point = new Point();
-		Random rand = new Random();
-		point.setX(rand.nextInt(WorldMap.MAP_SIZE));
-		point.setY(rand.nextInt(WorldMap.MAP_SIZE));
-		point.setName(name);
-		int pointId = rand.nextInt();
-		while (world.getPoints().containsKey(Integer.valueOf(pointId))) {
-			pointId = rand.nextInt();
-		}
-		point.setId(pointId);
-		point.setColor(rand.nextInt(1000));
-		return point;
 	}
 }

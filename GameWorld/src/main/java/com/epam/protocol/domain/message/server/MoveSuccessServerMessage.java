@@ -3,15 +3,15 @@ package com.epam.protocol.domain.message.server;
 import com.epam.protocol.domain.message.Message;
 import com.epam.protocol.domain.message.constants.ServerMessageType;
 
-public class MoveSuccessMessage implements Message {
+public class MoveSuccessServerMessage implements Message {
 	private static final byte id = ServerMessageType.SM_MOVE_SUCCESS;
 	private int x;
 	private int y;
 
-	public MoveSuccessMessage() {
+	public MoveSuccessServerMessage() {
 	}
 
-	public MoveSuccessMessage(int x, int y) {
+	public MoveSuccessServerMessage(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
